@@ -1,0 +1,139 @@
+---------------------Create Table
+
+create table Customer_master
+(
+id int primary key identity(1,1),
+first_name varchar(25),
+last_name varchar(25),
+contact_no varchar(15),
+pincode int
+)
+
+create table Product
+(
+id int primary key identity(1,1),
+name varchar(25)
+)
+
+create table Order_master
+(
+id int primary key identity(1,1),
+customer_id int FOREIGN KEY  REFERENCES Customer_master(id),
+product_id int FOREIGN KEY  REFERENCES Product(id),
+remarks varchar(100)
+)
+
+
+----------------- For insert
+
+create procedure insert_order 
+@Customer_name varchar(250),
+@product varchar(250),
+@remarks varchar(500)
+as
+begin
+
+insert into Customer_master
+(first_name)
+values
+(@Customer_name)
+
+insert into Product
+(name)
+values
+(@product)
+
+declare @cus_id int,@pro_id int 
+
+select @cus_id=max(id) from Customer_master
+select @pro_id=max(id) from Product
+
+insert into Order_master
+(customer_id,product_id,remarks)
+values
+(@cus_id,@pro_id,@remarks)
+
+end
+
+----------------- For Update
+
+create procedure update_order 
+@order_id int,
+@Customer_name varchar(250),
+@product varchar(250),
+@remarks varchar(500)
+
+as
+begin
+
+declare @cus_id int,@pro_id int
+
+select 
+	@cus_id = customer_id,
+	@pro_id = product_id 
+from 
+	Order_master
+where id = @order_id 
+
+update Customer_master
+set first_name = @Customer_name
+where id = @cus_id
+
+update Product
+set name = @product
+where id = @pro_id
+
+update Order_master
+set remarks = @remarks
+where id = @order_id
+
+end
+
+----------------- For Delete
+
+create procedure delete_order 
+@order_id int
+as
+begin
+
+delete from Order_master
+where id = @order_id
+
+end
+
+----------------- For Get
+
+create procedure Get_order
+as
+begin
+
+select 
+	ord.id,
+	first_name,
+	pd.name as pro_name,
+	remarks
+from 
+	Order_master ord
+	inner join Customer_master cm on cm.id = customer_id
+	inner join Product pd on pd.id = product_id
+
+end
+
+-------------------For Fetch 
+
+alter procedure Fetch_order 2
+@order_id int
+as
+begin
+
+select 
+	first_name,
+	pd.name as productname,
+	remarks
+from 
+	Order_master ord
+	inner join Customer_master cm on cm.id = customer_id
+	inner join Product pd on pd.id = product_id
+where ord.id = @order_id
+
+end
